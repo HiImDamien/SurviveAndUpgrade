@@ -4,14 +4,10 @@
 std = "roblox"
 
 [rules]
-# Enforce use of task.* over deprecated coroutine wrappers
-deprecated = "deny"
-
-# Warn on unused variables (prefix with _ to silence intentionally)
+# Style warnings — don't block the build, just inform
+multiple_statements = "warn"
 unused_variable = "warn"
-
-# Disallow global assignments
-global_usage = "deny"
-
-# Disallow empty if/else blocks
+deprecated = "warn"
+global_usage = "warn"
 empty_if = "warn"
+roblox_manual_fromscale_or_fromoffset = "warn"

@@ -9,10 +9,8 @@
 -- and deals damage only if an actual enemy is hit within weapon range.
 -- A BulletFired event is sent to all clients for the visual trail.
 
-local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Constants         = require(ReplicatedStorage.Shared.Constants)
 local WeaponDefinitions = require(ReplicatedStorage.Shared.WeaponDefinitions)
 local CurrencyManager   = require(script.Parent.CurrencyManager)
 
