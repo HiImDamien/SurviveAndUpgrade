@@ -1,0 +1,17 @@
+# Selene Luau linter configuration
+# https://kampfkarren.github.io/selene/
+
+std = "roblox"
+
+[rules]
+# Enforce use of task.* over deprecated coroutine wrappers
+deprecated = "deny"
+
+# Warn on unused variables (prefix with _ to silence intentionally)
+unused_variable = "warn"
+
+# Disallow global assignments
+global_usage = "deny"
+
+# Disallow empty if/else blocks
+empty_if = "warn"

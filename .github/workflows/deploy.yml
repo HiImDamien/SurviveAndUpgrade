@@ -1,0 +1,65 @@
+name: Validate and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. Install Rojo ────────────────────────────────────────────────────
+      # nicell/setup-rojo pulls the latest Rojo binary from GitHub releases.
+      - name: Install Rojo
+        uses: nicell/setup-rojo@v1
+
+      # ── 3. Install Selene (Luau linter) ────────────────────────────────────
+      - name: Install Selene
+        run: |
+          SELENE_VERSION=$(curl -s https://api.github.com/repos/Kampfkarren/selene/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
+          curl -sL "https://github.com/Kampfkarren/selene/releases/download/${SELENE_VERSION}/selene-${SELENE_VERSION}-linux.zip" -o selene.zip
+          unzip -q selene.zip selene
+          chmod +x selene
+          sudo mv selene /usr/local/bin/selene
+
+      # ── 4. Lint ────────────────────────────────────────────────────────────
+      # Lint all three source directories. Fails the build on any error.
+      - name: Lint with Selene
+        run: selene Server/ Client/ Shared/
+
+      # ── 5. Build ───────────────────────────────────────────────────────────
+      # Produces game.rbxl — if the project.json or file tree is broken this fails fast.
+      - name: Build with Rojo
+        run: rojo build default.project.json --output game.rbxl
+
+      # ── 6. Deploy (main branch only) ───────────────────────────────────────
+      # Pushes the built place file to Roblox via Open Cloud API.
+      # Requires three repository secrets:
+      #   ROBLOX_API_KEY     — Open Cloud key with universe.place:write scope
+      #   ROBLOX_UNIVERSE_ID — found in Creator Hub > game settings
+      #   ROBLOX_PLACE_ID    — the start place ID (shown in the URL in Studio)
+      - name: Deploy to Roblox
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            "https://apis.roblox.com/universes/v1/${{ secrets.ROBLOX_UNIVERSE_ID }}/places/${{ secrets.ROBLOX_PLACE_ID }}/versions?versionType=Published" \
+            -H "x-api-key: ${{ secrets.ROBLOX_API_KEY }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @game.rbxl)
+
+          echo "Response: $(cat response.json)"
+
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Deploy failed with HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+          echo "Deploy succeeded!"
