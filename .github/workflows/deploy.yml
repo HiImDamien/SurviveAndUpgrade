@@ -15,10 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Install Rojo ────────────────────────────────────────────────────
-      # nicell/setup-rojo pulls the latest Rojo binary from GitHub releases.
-      - name: Install Rojo
-        uses: nicell/setup-rojo@v1
+      # ── 2. Install Aftman + Rojo ───────────────────────────────────────────
+      # Uses aftman.toml in the repo to install Rojo — same as local setup.
+      - name: Install Aftman
+        uses: ok-nick/setup-aftman@v0.4.2
+
+      - name: Install Rojo via Aftman
+        run: aftman install --no-trust-check
 
       # ── 3. Install Selene (Luau linter) ────────────────────────────────────
       - name: Install Selene
