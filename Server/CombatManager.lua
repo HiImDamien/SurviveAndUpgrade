@@ -48,9 +48,7 @@ local function getWeaponStats(playerData: {}): {}
 	for upgradeLevel, overrides in pairs(weaponDef.upgradeLevels) do
 		if level >= upgradeLevel then
 			for stat, value in pairs(overrides) do
-				if type(value) == "number" then
-					stats[stat] = value
-				elseif type(value) == "boolean" then
+				if type(value) == "number" or type(value) == "boolean" then
 					stats[stat] = value
 				end
 			end

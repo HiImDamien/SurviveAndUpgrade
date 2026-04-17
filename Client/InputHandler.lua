@@ -88,12 +88,8 @@ function InputHandler.init()
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			InputHandler.onAttack()
 
-		-- Controller — Right Trigger (R2 / RT) = attack
-		elseif input.KeyCode == Enum.KeyCode.ButtonR2 then
-			InputHandler.onAttack()
-
-		-- Controller — Right Bumper (R1 / RB) = alternate attack binding
-		elseif input.KeyCode == Enum.KeyCode.ButtonR1 then
+		-- Controller — Right Trigger (R2) or Right Bumper (R1) = attack
+		elseif input.KeyCode == Enum.KeyCode.ButtonR2 or input.KeyCode == Enum.KeyCode.ButtonR1 then
 			InputHandler.onAttack()
 		end
 	end)
