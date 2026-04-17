@@ -39,10 +39,7 @@ local function getWeaponStats(playerData: {}): {}
 	local level = (ownedWeapons[weaponName] and ownedWeapons[weaponName].level) or 1
 
 	-- Start with ALL base stats (preserves ranged, pellets, etc.)
-	local stats = {}
-	for k, v in pairs(weaponDef.baseStats) do
-		stats[k] = v
-	end
+	local stats = table.clone(weaponDef.baseStats)
 
 	-- Apply upgrade level overrides (higher levels layer on top)
 	for upgradeLevel, overrides in pairs(weaponDef.upgradeLevels) do
