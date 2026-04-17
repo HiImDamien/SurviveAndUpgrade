@@ -33,9 +33,16 @@ jobs:
           sudo mv selene /usr/local/bin/selene
 
       # ── 4. Lint ────────────────────────────────────────────────────────────
-      # Lint all three source directories. Fails the build on any error.
+      # Selene exits with code 1 for warnings AND errors — we only want to
+      # fail the build on actual errors (error[...]), not style warnings.
       - name: Lint with Selene
-        run: selene Server/ Client/ Shared/
+        run: |
+          OUTPUT=$(selene Server/ Client/ Shared/ 2>&1) || true
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "^error\["; then
+            echo "Selene found errors — fix them before deploying."
+            exit 1
+          fi
 
       # ── 5. Build ───────────────────────────────────────────────────────────
       # Produces game.rbxl — if the project.json or file tree is broken this fails fast.
