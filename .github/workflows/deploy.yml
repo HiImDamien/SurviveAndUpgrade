@@ -58,18 +58,29 @@ jobs:
       - name: Deploy to Roblox
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
-            -X POST \
-            "https://apis.roblox.com/universes/v1/${{ secrets.ROBLOX_UNIVERSE_ID }}/places/${{ secrets.ROBLOX_PLACE_ID }}/versions?versionType=Published" \
-            -H "x-api-key: ${{ secrets.ROBLOX_API_KEY }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @game.rbxl)
+          MAX_ATTEMPTS=5
+          DELAY=15
 
-          echo "Response: $(cat response.json)"
+          for ATTEMPT in $(seq 1 $MAX_ATTEMPTS); do
+            echo "Deploy attempt $ATTEMPT of $MAX_ATTEMPTS..."
 
-          if [ "$HTTP_STATUS" -ne 200 ]; then
-            echo "Deploy failed with HTTP $HTTP_STATUS"
-            exit 1
-          fi
+            HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+              -X POST \
+              "https://apis.roblox.com/universes/v1/${{ secrets.ROBLOX_UNIVERSE_ID }}/places/${{ secrets.ROBLOX_PLACE_ID }}/versions?versionType=Published" \
+              -H "x-api-key: ${{ secrets.ROBLOX_API_KEY }}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @game.rbxl)
 
-          echo "Deploy succeeded!"
+            echo "Response: $(cat response.json)"
+
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "Deploy succeeded!"
+              exit 0
+            fi
+
+            echo "Got HTTP $HTTP_STATUS — waiting ${DELAY}s before retry..."
+            sleep $DELAY
+          done
+
+          echo "Deploy failed after $MAX_ATTEMPTS attempts."
+          exit 1
