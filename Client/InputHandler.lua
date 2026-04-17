@@ -84,12 +84,11 @@ function InputHandler.init()
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then return end  -- ignore if UI is focused / chat is open
 
-		-- Mouse (PC)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			InputHandler.onAttack()
-
-		-- Controller — Right Trigger (R2) or Right Bumper (R1) = attack
-		elseif input.KeyCode == Enum.KeyCode.ButtonR2 or input.KeyCode == Enum.KeyCode.ButtonR1 then
+		-- Mouse (PC) or Controller (R2 / R1)
+		if input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.KeyCode == Enum.KeyCode.ButtonR2
+			or input.KeyCode == Enum.KeyCode.ButtonR1
+		then
 			InputHandler.onAttack()
 		end
 	end)
